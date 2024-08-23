@@ -40,15 +40,7 @@ BOOLEAN HyperHideDrv::CallDriver(size_t Ioctl)
 
 void HyperHideDrv::SetHyperVisorVisibility(BOOLEAN Value)
 {
-    DWORD BytesReturned = 0;
-    DeviceIoControl
-    (
-        this->DriverHandle,
-        IOCTL_SET_HYPERVISOR_VISIBILITY,
-        &Value, sizeof(BOOLEAN),
-        0, 0,
-        &BytesReturned, NULL
-    );
+    return;
 }
 
 BOOLEAN HyperHideDrv::Hide(HIDE_INFO& HideInfo)

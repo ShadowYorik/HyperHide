@@ -6,12 +6,23 @@
 #include "Log.h"
 #include "GlobalData.h"
 #include "Peb.h"
+#include "hde/hde64.h"
+#include "hk/hk.h"
+
+typedef struct _HOOK_INFO
+{
+	LIST_ENTRY HooksList;
+	PVOID AddressOfTargetFunction;
+	PVOID OriginalTrampoline;
+} HOOK_INFO, *PHOOK_INFO;
 
 extern HYPER_HIDE_GLOBAL_DATA g_HyperHide;
 
 NTAPI_OFFSETS NtapiOffsets;
 
 INT64(__fastcall* MiGetPteAddress)(UINT64);
+
+LIST_ENTRY HooksListHead;
 
 BOOLEAN RtlUnicodeStringContains(PUNICODE_STRING Str, PUNICODE_STRING SubStr, BOOLEAN CaseInsensitive)
 {
@@ -731,4 +742,43 @@ BOOLEAN GetOffsets()
 	}
 
 	return TRUE;
+}
+
+void InitHooksList()
+{
+	InitializeListHead(&HooksListHead);
+}
+
+BOOLEAN HookFunction(PVOID AddressOfTargetFunction, PVOID NewFunctionAddress, PVOID* OriginFunction)
+{
+	if (!NT_SUCCESS(HkDetourFunction(AddressOfTargetFunction, NewFunctionAddress, OriginFunction)))
+		return FALSE;
+
+	PHOOK_INFO HookInfo = (PHOOK_INFO)ExAllocatePoolWithTag(NonPagedPool, sizeof(HOOK_INFO), DRIVER_TAG);
+	if (HookInfo == NULL)
+	{
+		HkRestoreFunction(AddressOfTargetFunction, *OriginFunction);
+		return FALSE;
+	}
+
+	RtlSecureZeroMemory(HookInfo, sizeof(HOOK_INFO));
+	HookInfo->AddressOfTargetFunction = AddressOfTargetFunction;
+	HookInfo->OriginalTrampoline = *OriginFunction;
+
+	InsertTailList(&HooksListHead, &HookInfo->HooksList);
+	return TRUE;
+}
+
+void UnhookAllFunctions()
+{
+	PLIST_ENTRY Current = HooksListHead.Flink;
+	while (Current != &HooksListHead)
+	{
+		PHOOK_INFO HookInfo = CONTAINING_RECORD(Current, HOOK_INFO, HooksList);
+		RemoveEntryList(Current);
+		Current = Current->Flink;
+
+		HkRestoreFunction(HookInfo->AddressOfTargetFunction, HookInfo->OriginalTrampoline);
+		ExFreePool(HookInfo);
+	}
 }

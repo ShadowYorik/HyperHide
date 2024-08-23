@@ -11,7 +11,7 @@ struct SyscallInfo
 	PVOID* OriginalFunctionAddress;
 };
 
-BOOLEAN GetNtSyscallNumbers(std::array<SyscallInfo, 22>& SyscallsToFind);
+BOOLEAN GetNtSyscallNumbers(std::array<SyscallInfo, 23>& SyscallsToFind);
 
 BOOLEAN GetWin32kSyscallNumbers(std::array<SyscallInfo, 5>& SyscallsToFind);
 

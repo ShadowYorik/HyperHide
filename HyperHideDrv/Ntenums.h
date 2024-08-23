@@ -1,5 +1,7 @@
 #pragma once
 
+#define SEC_NO_CHANGE 0x00400000
+
 enum _LDR_DLL_LOAD_REASON
 {
     LoadReasonStaticDependency = 0,
@@ -13,11 +15,6 @@ enum _LDR_DLL_LOAD_REASON
     LoadReasonEnclaveDependency = 8,
     LoadReasonUnknown = -1
 };
-
-typedef enum _PSCREATETHREADNOTIFYTYPE {
-    PsCreateThreadNotifyNonSystem = 0,
-    PsCreateThreadNotifySubsystems = 1
-} PSCREATETHREADNOTIFYTYPE;
 
 enum SYSDBG_COMMAND
 {
@@ -78,3 +75,25 @@ typedef enum _THREAD_STATE_ROUTINE
     THREADSTATE_GETTHREADINFO,
     THREADSTATE_ACTIVEWINDOW
 } THREAD_STATE_ROUTINE;
+
+typedef enum _HARDERROR_RESPONSE_OPTION {
+    OptionAbortRetryIgnore,
+    OptionOk,
+    OptionOkCancel,
+    OptionRetryCancel,
+    OptionYesNo,
+    OptionYesNoCancel,
+    OptionShutdownSystem
+} HARDERROR_RESPONSE_OPTION, *PHARDERROR_RESPONSE_OPTION;
+
+typedef enum _HARDERROR_RESPONSE {
+    ResponseReturnToCaller,
+    ResponseNotHandled,
+    ResponseAbort,
+    ResponseCancel,
+    ResponseIgnore,
+    ResponseNo,
+    ResponseOk,
+    ResponseRetry,
+    ResponseYes
+} HARDERROR_RESPONSE, * PHARDERROR_RESPONSE;

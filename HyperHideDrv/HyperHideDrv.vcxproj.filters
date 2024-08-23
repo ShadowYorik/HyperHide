@@ -17,6 +17,18 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Header Files\hde">
+      <UniqueIdentifier>{535bce23-f490-41f0-a570-219618cedbb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hde">
+      <UniqueIdentifier>{e636b11f-8064-4077-b2f8-2135332539c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\hk">
+      <UniqueIdentifier>{3da6a74e-bb90-43c2-80a4-f5e7d45db03e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hk">
+      <UniqueIdentifier>{fa96e8d3-9a67-4a66-b0b9-a7dbd1c9e0a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Driver.cpp">
@@ -40,9 +52,6 @@
     <ClCompile Include="Hider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HypervisorGateway.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="KuserSharedData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,6 +66,15 @@
     </ClCompile>
     <ClCompile Include="Ssdt.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hde\hde64.c">
+      <Filter>Source Files\hde</Filter>
+    </ClCompile>
+    <ClCompile Include="hk\hk.c">
+      <Filter>Source Files\hk</Filter>
+    </ClCompile>
+    <ClCompile Include="hk\trampoline.c">
+      <Filter>Source Files\hk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,9 +93,6 @@
     <ClInclude Include="Ntapi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vmintrin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Heap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -88,9 +103,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Hider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HypervisorGateway.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GlobalData.h">
@@ -117,10 +129,17 @@
     <ClInclude Include="Ntenums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="vmintrin.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
+    <ClInclude Include="hde\hde64.h">
+      <Filter>Header Files\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="hde\table64.h">
+      <Filter>Header Files\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="hk\hk.h">
+      <Filter>Header Files\hk</Filter>
+    </ClInclude>
+    <ClInclude Include="hk\trampoline.h">
+      <Filter>Header Files\hk</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

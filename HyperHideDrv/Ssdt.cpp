@@ -2,7 +2,6 @@
 #include <ntifs.h>
 #include "Utils.h"
 #include "Log.h"
-#include "HypervisorGateway.h"
 #include "GlobalData.h"
 #include "Ntapi.h"
 #include <intrin.h>
@@ -82,7 +81,7 @@ namespace SSDT
 		static UCHAR KernelAlignIndex = 0;
 
 		PVOID AddressOfTargetFunction = (PVOID)((ULONG64)NtTable->ServiceTable + (NtTable->ServiceTable[SyscallIndex] >> 4));
-		return hv::hook_function(AddressOfTargetFunction, NewFunctionAddress, OriginFunction);
+		return HookFunction(AddressOfTargetFunction, NewFunctionAddress, OriginFunction);
 	}
 
 	BOOLEAN HookWin32kSyscall(CHAR* SyscallName, SHORT SyscallIndex, PVOID NewFunctionAddress, PVOID* OriginFunction)
@@ -98,7 +97,7 @@ namespace SSDT
 		PEPROCESS CsrssProcess = GetCsrssProcess();
 		KeStackAttachProcess((PRKPROCESS)CsrssProcess, &State);
 
-		BOOLEAN Status = hv::hook_function(AddressOfTargetFunction, NewFunctionAddress, OriginFunction);
+		BOOLEAN Status = HookFunction(AddressOfTargetFunction, NewFunctionAddress, OriginFunction);
 
 		KeUnstackDetachProcess(&State);
 

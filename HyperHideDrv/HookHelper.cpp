@@ -4,7 +4,6 @@
 #include "Utils.h"
 #include "HookHelper.h"
 #include "GlobalData.h"
-#include "HypervisorGateway.h"
 #include "Log.h"
 #include <intrin.h>
 
@@ -59,7 +58,7 @@ SHORT GetSyscallNumber(PVOID FunctionAddress)
 	return *(SHORT*)((ULONG64)FunctionAddress + 4);
 }
 
-BOOLEAN GetNtSyscallNumbers(std::array<SyscallInfo, 22>& SyscallsToFind)
+BOOLEAN GetNtSyscallNumbers(std::array<SyscallInfo, 23>& SyscallsToFind)
 {
 	UNICODE_STRING knownDlls{};
 	RtlInitUnicodeString(&knownDlls, LR"(\KnownDlls\ntdll.dll)");

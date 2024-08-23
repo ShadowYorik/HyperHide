@@ -18,7 +18,6 @@ namespace Hider
 	CONST WCHAR* HiddenDeviceNames[] =
 	{
 		L"\\??\\HyperHideDrv",
-		L"\\??\\airhv",
 		L"\\??\\ProcmonDebugLogger",
 	};
 	

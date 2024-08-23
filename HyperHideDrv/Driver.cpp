@@ -4,7 +4,6 @@
 #include "Utils.h"
 #include "HookedFunctions.h"
 #include "GlobalData.h"
-#include "HypervisorGateway.h"
 #include "Dispatcher.h"
 #include "Notifiers.h"
 #include "Ssdt.h"
@@ -24,7 +23,7 @@ VOID DrvUnload(PDRIVER_OBJECT  DriverObject)
 	PsRemoveCreateThreadNotifyRoutine(ThreadNotifyRoutine);
 	PsSetCreateProcessNotifyRoutine(ProcessNotifyRoutine, TRUE);
 
-	hv::unhook_all_functions();
+	UnhookAllFunctions();
 
 	KeDelayExecutionThread(KernelMode, FALSE, &WaitTime);
 
@@ -76,18 +75,6 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT Driver, PCUNICODE_STRING Reg)
 	RtlGetVersion(&OsVersion);
 	g_HyperHide.CurrentWindowsBuildNumber = OsVersion.dwBuildNumber;
 
-	__try
-	{
-		if (hv::test_vmcall() == FALSE)
-			return STATUS_UNSUCCESSFUL;
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER) 
-	{
-		return STATUS_UNSUCCESSFUL;
-	}
-	 
-	LogInfo("HyperVisor On");
-
 	if (GetOffsets() == FALSE)
 		return STATUS_UNSUCCESSFUL;
 
@@ -120,9 +107,11 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT Driver, PCUNICODE_STRING Reg)
 
 	LogInfo("PsSetCreateProcessNotifyRoutine succeded");
 
+	InitHooksList();
+
 	if(HookSyscalls() == FALSE)
 	{
-		hv::unhook_all_functions();
+		UnhookAllFunctions();
 		PsRemoveCreateThreadNotifyRoutine(ThreadNotifyRoutine);
 		PsSetCreateProcessNotifyRoutine(ProcessNotifyRoutine, TRUE);
 		Hider::Uninitialize();

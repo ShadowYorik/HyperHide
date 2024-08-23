@@ -11,7 +11,6 @@
 #include "HookHelper.h"
 #include "Ssdt.h"
 #include "HookedFunctions.h"
-#include "HypervisorGateway.h"
 
 CONST PKUSER_SHARED_DATA KuserSharedData = (PKUSER_SHARED_DATA)KUSER_SHARED_DATA_USERMODE;
 
@@ -1643,6 +1642,21 @@ NTSTATUS NTAPI HookedNtQueryInformationJobObject(HANDLE JobHandle, JOBOBJECTINFO
 	return status;
 }
 
+NTSTATUS(NTAPI* OriginalNtRaiseHardError)(NTSTATUS ErrorStatus, ULONG NumberOfParameters, PUNICODE_STRING UnicodeStringParameterMask, PVOID* Parameters, HARDERROR_RESPONSE_OPTION ResponseOption, PHARDERROR_RESPONSE Response);
+NTSTATUS NTAPI HookedNtRaiseHardError(NTSTATUS ErrorStatus, ULONG NumberOfParameters, PUNICODE_STRING UnicodeStringParameterMask, PVOID* Parameters, HARDERROR_RESPONSE_OPTION ResponseOption, PHARDERROR_RESPONSE Response)
+{
+	if (ResponseOption == OptionShutdownSystem)
+		return STATUS_ACCESS_DENIED;
+
+	return OriginalNtRaiseHardError(ErrorStatus, NumberOfParameters, UnicodeStringParameterMask, Parameters, ResponseOption, Response);
+}
+
+NTSTATUS(NTAPI* OriginalNtCreateSection)(PHANDLE SectionHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PLARGE_INTEGER MaximumSize, ULONG SectionPageProtection, ULONG AllocationAttributes, HANDLE FileHandle);
+NTSTATUS NTAPI HookedNtCreateSection(PHANDLE SectionHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PLARGE_INTEGER MaximumSize, ULONG SectionPageProtection, ULONG AllocationAttributes, HANDLE FileHandle)
+{
+	return OriginalNtCreateSection(SectionHandle, DesiredAccess, ObjectAttributes, MaximumSize, SectionPageProtection, AllocationAttributes & ~SEC_NO_CHANGE, FileHandle);
+}
+
 // Win32k Syscalls
 
 HANDLE (NTAPI* OriginalNtUserQueryWindow)(HANDLE hWnd, WINDOWINFOCLASS WindowInfo);
@@ -1799,7 +1813,8 @@ BOOLEAN HookNtSyscalls()
 		SyscallInfo{0, "NtGetNextProcess", HookedNtGetNextProcess,(void**)&OriginalNtGetNextProcess},
 		SyscallInfo{0, "NtOpenProcess", HookedNtOpenProcess, (void**)&OriginalNtOpenProcess},
 		SyscallInfo{0, "NtOpenThread", HookedNtOpenThread, (void**)&OriginalNtOpenThread},
-		SyscallInfo{0, "NtSetInformationProcess", HookedNtSetInformationProcess, (void**)&OriginalNtSetInformationProcess}
+		SyscallInfo{0, "NtSetInformationProcess", HookedNtSetInformationProcess, (void**)&OriginalNtSetInformationProcess},
+		SyscallInfo{0, "NtRaiseHardError", HookedNtRaiseHardError, (void**)&OriginalNtRaiseHardError}
 	};
 	if (g_HyperHide.CurrentWindowsBuildNumber < WINDOWS_10_VERSION_20H1) NtSyscallsToHook[0].SyscallName = "NtContinue";
 
@@ -1828,7 +1843,7 @@ BOOLEAN HookWin32kSyscalls()
 		SyscallInfo{0UL, "NtUserBuildHwndList", HookedNtUserBuildHwndList, (void**)&OriginalNtUserBuildHwndList},
 		SyscallInfo{0UL, "NtUserFindWindowEx", HookedNtUserFindWindowEx, (void**)&OriginalNtUserFindWindowEx},
 		SyscallInfo{0UL, "NtUserQueryWindow", HookedNtUserQueryWindow, (void**)&OriginalNtUserQueryWindow},
-		SyscallInfo{0UL, "NtUserGetForegroundWindow", HookedNtUserGetForegroundWindow, (void**)&OriginalNtUserGetForegroundWindow},
+		SyscallInfo{0UL, "NtUserGetForegroundWindow", nullptr, (void**)&OriginalNtUserGetForegroundWindow},
 		SyscallInfo{0UL, "NtUserGetThreadState", nullptr, nullptr},
 	};
 	if (g_HyperHide.CurrentWindowsBuildNumber <= WINDOWS_7_SP1)
@@ -1904,7 +1919,7 @@ BOOLEAN HookKiDispatchException()
 
 		LogInfo("KiDispatchException address: 0x%llx", KiDispatchExceptionAddress);
 
-		return hv::hook_function(KiDispatchExceptionAddress, HookedKiDispatchException, (PVOID*)&OriginalKiDispatchException);
+		return HookFunction(KiDispatchExceptionAddress, HookedKiDispatchException, (PVOID*)&OriginalKiDispatchException);
 	}
 
 	LogError("KiDispatchException hook failed");

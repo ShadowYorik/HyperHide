@@ -58,3 +58,9 @@ BOOLEAN GetOffsets();
 PVOID GetUserModeModule(PEPROCESS Process, CONST WCHAR* ModuleName, BOOLEAN IsWow64);
 
 UNICODE_STRING PsQueryFullProcessImageName(PEPROCESS TargetProcess);
+
+void InitHooksList();
+
+BOOLEAN HookFunction(PVOID AddressOfTargetFunction, PVOID NewFunctionAddress, PVOID* OriginFunction);
+
+void UnhookAllFunctions();
